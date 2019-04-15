@@ -4,6 +4,7 @@ import com.alibaba.fescar.spring.annotation.GlobalTransactional;
 import com.example.fescardemo.common.web.BaseResult;
 import com.example.fescardemo.repository.OrderRepository;
 import com.example.fescardemo.service.OrderService;
+import com.example.fescardemo.service.restful.AccountConsumer;
 import com.example.fescardemo.service.restful.StockConsumer;
 import com.example.fescardemo.table.Order;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,25 +17,23 @@ import javax.transaction.Transactional;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
     private StockConsumer stockConsumer;
 
     @Autowired
-    private OrderRepository orderRepository;
+    private AccountConsumer accountConsumer;
 
     @Override
     @GlobalTransactional(name = "createOrder")
     public Order createOrder(Order order) {
+        //1.保存成功
         orderRepository.save(order);
-//        try {
-
-            BaseResult<Boolean> result = stockConsumer.reduceStock(order.getGoodsId(), order.getCount());
-            Boolean data = result.getData();
-            if ( data != null && !data){
-                throw new RuntimeException("减库存错误");
-            }
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
+        //2.保存成功
+        stockConsumer.reduceStock(order.getGoodsId(), order.getCount());
+        //3.保存失败，导致前面的两个成功的回滚
+        accountConsumer.reduceAccount(32L, 100L);
         return order;
     }
 }

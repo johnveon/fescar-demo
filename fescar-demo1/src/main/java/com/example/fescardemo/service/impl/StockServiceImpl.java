@@ -25,10 +25,10 @@ public class StockServiceImpl implements StockService {
             stock.setCount(stock.getCount() - count);
             stockRepository.save(stock);
         }
-        boolean b = true;
-        if (b){
-            throw new RuntimeException("人工错误");
-        }
+//        boolean b = true;
+//        if (b){
+//            throw new RuntimeException("人工错误");
+//        }
         return true;
     }
 }
